@@ -1,0 +1,1316 @@
+# Finance Core — Cursor Rules
+
+## Project Context
+Personal finance platform with AI-assisted classification and recommendations.
+
+Core domain entities:
+- User
+- Transaction
+- Category
+- Merchant
+- Classification
+
+The system is designed as a **scalable microservices architecture**, but initially implemented as a **modular monorepo**.
+
+---
+
+## Stack
+
+### Backend
+- Language: C# 12 (.NET 8)
+- Framework: ASP.NET Core Web API
+- Architecture: Clean Architecture with CQRS via MediatR
+- ORM: Entity Framework Core 8
+- Validation: FluentValidation 11
+- Testing: xUnit + Moq + FluentAssertions
+
+### Frontend
+- Framework: Angular 18
+- TypeScript: 5.4+ (strict mode — `"strict": true` in tsconfig.json)
+- Node: 20 LTS
+- Client generator: orval 7
+- Styles: SCSS with CSS custom properties for theming
+- Testing: Jest + Angular Testing Library
+
+### Database
+- PostgreSQL 16
+- Npgsql EF Core provider 8
+
+### AI Integration
+- External LLM APIs (multi-model ready)
+
+---
+
+## Pinned Versions (STRICT — do not deviate)
+
+| Package | Version |
+|---|---|
+| .NET | 8 |
+| C# | 12 |
+| EF Core + Npgsql EF | 8.x |
+| MediatR | 12.x |
+| FluentValidation | 11.x |
+| Swashbuckle.AspNetCore | 6.x |
+| xUnit | 2.x |
+| Moq | 4.x |
+| FluentAssertions | 6.x |
+| Angular | 18 |
+| TypeScript | 5.4+ |
+| orval | 7.x |
+| Node | 20 LTS |
+
+---
+
+## Monorepo Filesystem Layout (STRICT)
+
+```
+/                                   <- repo root
+  /backend                          <- .NET solution root
+    FinanceCore.sln
+    /src
+      /FinanceCore.Api
+      /FinanceCore.Application
+      /FinanceCore.Domain
+      /FinanceCore.Infrastructure
+    /tests
+      /FinanceCore.UnitTests
+      /FinanceCore.IntegrationTests
+
+  /frontend                         <- Angular workspace root
+    angular.json
+    orval.config.ts
+    package.json
+    tsconfig.json
+    /src
+      /app
+        /api-client                 <- orval output — DO NOT EDIT MANUALLY
+        /core
+        /shared
+        /features
+        app.config.ts
+        app.routes.ts
+        app.component.ts
+      /environments
+        environment.ts
+        environment.production.ts
+
+  .github/
+    workflows/
+      backend.yml
+      frontend.yml
+```
+
+### Path Anchoring Rules
+
+| File | Location | Paths relative to |
+|---|---|---|
+| `orval.config.ts` | `/frontend` | `/frontend` |
+| `angular.json` | `/frontend` | `/frontend` |
+| `tsconfig.json` | `/frontend` | `/frontend` |
+| `dotnet ef` commands | `/backend` | `/backend` |
+
+### CI Path Rules
+
+- Backend CI (`backend.yml`) runs from `/backend` — does NOT touch `/frontend`
+- Frontend CI (`frontend.yml`) runs from `/frontend` — does NOT touch `/backend`
+- `swagger.json` diff check: backend CI publishes swagger artifact; frontend CI downloads it and runs `npx orval --check`
+- NEVER use repo-root-relative paths inside `orval.config.ts` or `angular.json`
+
+---
+
+## Architecture Principles
+
+- Clean Architecture (Controller -> Handler -> Repository)
+- CQRS via MediatR: Commands for writes, Queries for reads
+- Controllers are thin: they only dispatch to MediatR and return HTTP responses
+- ALL business logic lives in Application layer as MediatR Command/Query handlers
+- Domain-driven design mindset
+- Microservices-ready (loose coupling, high cohesion)
+- Avoid premature distribution (start modular, evolve later)
+
+---
+
+## Domain Language (STRICT — use ONLY these terms)
+
+| Term | Never use |
+|---|---|
+| `User` | client, account holder |
+| `Transaction` | payment, expense, entry |
+| `Category` | tag, label |
+| `Merchant` | vendor, store |
+| `Classification` | tag, label, category AI result |
+| `AmountCents` (long) | amount, value (without the Cents suffix) |
+| `NormalizedAmountCents` (long) | normalized amount, USD amount |
+
+Rules:
+- `AmountCents` is always `long` — raw amount in the smallest currency unit
+- `NormalizedAmountCents` is always `long` — always in USD for cross-currency comparison
+- Currency code is always required alongside any amount
+- NEVER use `decimal`, `double`, `float`, or `int` for money anywhere
+
+---
+
+## Backend — Project Structure and Layer Rules
+
+### Solution Layout (STRICT)
+
+```
+/FinanceCore.sln
+
+/src
+  /FinanceCore.Api               <- Controllers, middleware, Swagger, Program.cs
+  /FinanceCore.Application       <- Commands, Queries, Handlers, DTOs, Validators
+  /FinanceCore.Domain            <- Domain models, interfaces (IRepository), enums, value objects
+  /FinanceCore.Infrastructure    <- EF Core DbContext, Repository implementations, migrations
+
+/tests
+  /FinanceCore.UnitTests         <- Handler-layer unit tests (xUnit + Moq + FluentAssertions)
+  /FinanceCore.IntegrationTests  <- Controller-level integration tests (WebApplicationFactory)
+```
+
+### Project Dependency Rules (STRICT)
+
+```
+Api -> Application -> Domain
+Infrastructure -> Application -> Domain
+```
+
+- `Api` depends on `Application` only (dispatches MediatR requests)
+- `Application` depends on `Domain` (uses domain models and IRepository interfaces)
+- `Infrastructure` depends on `Application` and `Domain` (implements interfaces)
+- `Domain` has NO dependencies on other projects
+- `Api` MUST NOT reference `Infrastructure` directly (only via DI registration)
+- `FinanceCore.Domain.csproj` MUST NOT list `Microsoft.EntityFrameworkCore` as a PackageReference
+
+### Per-Domain Folder Layout
+
+```
+/FinanceCore.Domain
+  /Users
+    User.cs
+    IUserRepository.cs
+  /Transactions
+    Transaction.cs
+    ITransactionRepository.cs
+    TransactionType.cs
+  /Categories
+    Category.cs
+    ICategoryRepository.cs
+  /Merchants
+    Merchant.cs
+    IMerchantRepository.cs
+  /Classifications
+    Classification.cs
+    IClassificationRepository.cs
+  /Shared
+    /Errors
+      DomainException.cs
+    /ValueObjects
+      Money.cs
+
+/FinanceCore.Application
+  /Transactions
+    /Commands
+      CreateTransaction/
+        CreateTransactionCommand.cs
+        CreateTransactionCommandHandler.cs
+        CreateTransactionCommandValidator.cs
+    /Queries
+      GetTransactionById/
+        GetTransactionByIdQuery.cs
+        GetTransactionByIdQueryHandler.cs
+      GetTransactionsByUser/
+        GetTransactionsByUserQuery.cs
+        GetTransactionsByUserQueryHandler.cs
+    TransactionDto.cs
+  /Categories
+    /Commands / /Queries
+    CategoryDto.cs
+  /Merchants
+    /Commands / /Queries
+    MerchantDto.cs
+  /Classifications
+    /Commands
+      ClassifyTransaction/
+        ClassifyTransactionCommand.cs
+        ClassifyTransactionCommandHandler.cs
+    ClassificationDto.cs
+  /Users
+    /Commands / /Queries
+    UserDto.cs
+  /Shared
+    IDbTransaction.cs
+    IUnitOfWork.cs
+    /Dtos
+      MoneyDto.cs
+      PagedResultDto.cs
+    /Mappers
+      TransactionMapper.cs
+      MoneyMapper.cs
+    /Exceptions
+      AppException.cs
+      InvalidClaimException.cs
+    /Results
+      Result.cs
+      Error.cs
+
+/FinanceCore.Infrastructure
+  /Persistence
+    FinanceCoreDbContext.cs
+    UnitOfWork.cs
+    EfDbTransaction.cs
+    /Converters
+      DateTimeOffsetUtcConverter.cs
+  /Users / /Transactions / /Categories / /Merchants / /Classifications
+    <Entity>Repository.cs
+    <Entity>Configuration.cs
+  /Migrations
+
+/FinanceCore.Api
+  /Transactions / /Categories / /Merchants / /Classifications / /Users
+    <Entity>sController.cs
+  /Shared
+    ApiControllerBase.cs
+    /Middleware
+      ExceptionHandlingMiddleware.cs
+    /Extensions
+      ServiceCollectionExtensions.cs
+      ResultExtensions.cs
+```
+
+Naming note: The DB transaction handle is `IDbTransaction` (not `ITransaction`) to avoid
+confusion with the domain aggregate `Transaction`.
+
+---
+
+## CQRS with MediatR (STRICT)
+
+Controllers dispatch MediatR requests and return HTTP responses. That is all they do.
+
+### Controller pattern
+
+```csharp
+[ApiController]
+[Route("api/v1/[controller]")]
+public sealed class TransactionsController : ApiControllerBase
+{
+    private readonly IMediator _mediator;
+    public TransactionsController(IMediator mediator) => _mediator = mediator;
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<TransactionDto>> GetById(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        Guid callerId = GetCurrentUserId();
+        Result<TransactionDto> result =
+            await _mediator.Send(new GetTransactionByIdQuery(id, callerId), cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemResult();
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<TransactionDto>> Create(
+        CreateTransactionCommand command,
+        CancellationToken cancellationToken)
+    {
+        Guid callerId = GetCurrentUserId();
+        Result<TransactionDto> result =
+            await _mediator.Send(command with { UserId = callerId }, cancellationToken);
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(GetById), new { id = result.Value!.Id }, result.Value)
+            : result.ToProblemResult();
+    }
+}
+```
+
+### Handler pattern
+
+```csharp
+public sealed class GetTransactionByIdQueryHandler
+    : IRequestHandler<GetTransactionByIdQuery, Result<TransactionDto>>
+{
+    private readonly ITransactionRepository _transactionRepository;
+
+    public GetTransactionByIdQueryHandler(ITransactionRepository transactionRepository)
+        => _transactionRepository = transactionRepository;
+
+    public async Task<Result<TransactionDto>> Handle(
+        GetTransactionByIdQuery query,
+        CancellationToken cancellationToken)
+    {
+        Transaction? transaction =
+            await _transactionRepository.GetByIdAsync(query.Id, cancellationToken);
+
+        if (transaction is null)
+            return Result.Failure<TransactionDto>(Error.NotFound(query.Id));
+
+        if (transaction.UserId != query.CallerId)
+            return Result.Failure<TransactionDto>(Error.Forbidden(query.Id));
+
+        return Result.Success(TransactionMapper.ToDto(transaction));
+    }
+}
+```
+
+### MediatR registration
+
+```csharp
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(CreateTransactionCommand).Assembly));
+```
+
+Anti-patterns (STRICTLY FORBIDDEN):
+- Business logic in Controllers
+- Injecting repositories directly into Controllers
+- Handlers calling other handlers
+- ServiceLocator or static access to IMediator
+- Static classes anywhere
+
+---
+
+## Result<T> Pattern (STRICT)
+
+Business errors use `Result<T>`. Exceptions are reserved for infrastructure failures
+and domain invariant violations.
+
+```csharp
+// Application/Shared/Results/Result.cs
+public sealed class Result<T>
+{
+    public bool IsSuccess { get; }
+    public T? Value { get; }
+    public Error? Error { get; }
+
+    private Result(bool isSuccess, T? value, Error? error)
+    {
+        IsSuccess = isSuccess;
+        Value = value;
+        Error = error;
+    }
+
+    public static Result<T> Success(T value) => new(true, value, null);
+    public static Result<T> Failure(Error error) => new(false, default, error);
+}
+
+public static class Result
+{
+    public static Result<T> Success<T>(T value) => Result<T>.Success(value);
+    public static Result<T> Failure<T>(Error error) => Result<T>.Failure(error);
+}
+```
+
+```csharp
+// Application/Shared/Results/Error.cs
+public sealed record Error(string Code, string Message)
+{
+    public static Error NotFound(Guid id) =>
+        new("not_found", $"Resource '{id}' was not found.");
+
+    public static Error Forbidden(Guid id) =>
+        new("forbidden", $"Access to resource '{id}' is forbidden.");
+
+    public static Error Validation(string message) =>
+        new("validation", message);
+}
+```
+
+```csharp
+// Api/Shared/Extensions/ResultExtensions.cs
+public static class ResultExtensions
+{
+    public static ActionResult ToProblemResult<T>(this Result<T> result) =>
+        result.Error!.Code switch
+        {
+            "not_found"  => new NotFoundObjectResult(ToProblem(result.Error, 404)),
+            "forbidden"  => new ObjectResult(ToProblem(result.Error, 403)) { StatusCode = 403 },
+            "validation" => new UnprocessableEntityObjectResult(ToProblem(result.Error, 422)),
+            _            => new ObjectResult(ToProblem(result.Error, 500)) { StatusCode = 500 },
+        };
+
+    private static ProblemDetails ToProblem(Error error, int status) => new()
+    {
+        Status = status,
+        Title  = error.Code,
+        Detail = error.Message,
+    };
+}
+```
+
+Rules:
+- Handlers NEVER throw exceptions for business errors — return `Result.Failure(Error.X(...))`
+- `DomainException` is still thrown in domain factory methods for invariant violations -> middleware catches -> 400
+- NEVER throw `ApplicationException` or `InvalidOperationException` for business flows
+
+---
+
+## Domain Model (STRICT)
+
+### Entity Design
+
+```csharp
+public sealed class Transaction
+{
+    public Guid Id { get; private set; }
+    public Guid UserId { get; private set; }
+    public Money Amount { get; private set; }
+    public TransactionType Type { get; private set; }
+    public Guid? MerchantId { get; private set; }
+    public Guid? CategoryId { get; private set; }
+    public DateTimeOffset OccurredAt { get; private set; }
+    public string? Description { get; private set; }
+
+    private Transaction() { }  // Required by EF Core
+
+    public static Transaction Create(
+        Guid userId, Money amount, TransactionType type,
+        DateTimeOffset occurredAt, string? description,
+        Guid? merchantId = null, Guid? categoryId = null)
+    {
+        if (occurredAt.Offset != TimeSpan.Zero)
+            throw new DomainException("OccurredAt must be UTC (offset must be zero).");
+
+        return new Transaction
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId, Amount = amount, Type = type,
+            OccurredAt = occurredAt, Description = description,
+            MerchantId = merchantId, CategoryId = categoryId,
+        };
+    }
+}
+```
+
+### Money Value Object (CRITICAL)
+
+Money is ALWAYS stored as `long` cents + currency code.
+Never use `decimal`, `double`, `float`, or `int`.
+
+```csharp
+// Domain/Shared/ValueObjects/Money.cs
+public sealed record Money
+{
+    public long AmountCents { get; }
+    public long NormalizedAmountCents { get; }  // always USD
+    public string Currency { get; }
+
+    public Money(long amountCents, string currency, long? normalizedAmountCents = null)
+    {
+        if (amountCents < 0)
+            throw new DomainException("Amount cannot be negative.");
+        if (string.IsNullOrWhiteSpace(currency))
+            throw new DomainException("Currency is required.");
+        if (currency.Length != 3)
+            throw new DomainException("Currency must be a 3-letter ISO 4217 code.");
+
+        AmountCents = amountCents;
+        Currency = currency.ToUpperInvariant();
+        NormalizedAmountCents = normalizedAmountCents ?? amountCents;
+    }
+}
+```
+
+EF Core configuration:
+```csharp
+builder.OwnsOne(t => t.Amount, money =>
+{
+    money.Property(m => m.AmountCents).HasColumnName("amount_cents").IsRequired();
+    money.Property(m => m.NormalizedAmountCents).HasColumnName("normalized_amount_cents").IsRequired();
+    money.Property(m => m.Currency).HasColumnName("currency").HasMaxLength(3).IsRequired();
+});
+```
+
+---
+
+## Date and Time (CRITICAL)
+
+All timestamps use `DateTimeOffset`. All values stored and transmitted in UTC.
+
+```csharp
+// Enforce in every factory method:
+if (occurredAt.Offset != TimeSpan.Zero)
+    throw new DomainException("OccurredAt must be UTC (offset must be zero).");
+```
+
+### DateTimeOffsetUtcConverter (REQUIRED — implement exactly)
+
+```csharp
+// Infrastructure/Persistence/Converters/DateTimeOffsetUtcConverter.cs
+public sealed class DateTimeOffsetUtcConverter : ValueConverter<DateTimeOffset, DateTimeOffset>
+{
+    public DateTimeOffsetUtcConverter()
+        : base(
+            d => d.ToUniversalTime(),
+            d => new DateTimeOffset(d.Ticks, TimeSpan.Zero))
+    { }
+}
+```
+
+Register globally in FinanceCoreDbContext:
+```csharp
+protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+{
+    configurationBuilder.Properties<DateTimeOffset>()
+        .HaveConversion<DateTimeOffsetUtcConverter>();
+}
+```
+
+### JSON serialization (single block in Program.cs)
+
+```csharp
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy   = JsonNamingPolicy.CamelCase;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+```
+
+CRITICAL: JsonStringEnumConverter makes enums serialize as strings ("Income" not 1).
+Swashbuckle reads this and emits string enums in OpenAPI.
+orval generates TypeScript string literal unions (e.g. 'Income' | 'Expense').
+Do NOT omit this converter.
+
+### End-to-End Date Pipeline
+
+```
+DB: timestamptz (always UTC)
+  -> Npgsql + DateTimeOffsetUtcConverter
+Domain: DateTimeOffset (UTC, Offset == Zero enforced)
+  -> TransactionMapper.ToDto()
+DTO: DateTimeOffset OccurredAt
+  -> System.Text.Json -> "2024-03-15T10:30:00+00:00"
+  -> OpenAPI (format: date-time) -> orval date transformer
+TypeScript: occurredAt: Date
+  -> DateFormatPipe
+UI: "Mar 15, 2024, 10:30 AM"
+```
+
+### orval date transformer (REQUIRED)
+
+```typescript
+// frontend/src/app/core/orval-date.transformer.ts
+import type { OutputTransformer } from 'orval';
+
+const transformer: OutputTransformer = (output) => ({
+  ...output,
+  schemas: output.schemas.map(schema => ({
+    ...schema,
+    model: schema.model.replace(
+      /(\w+\s*:\s*)string(.*\/\/ date-time)/g,
+      '$1Date$2'
+    ),
+  })),
+});
+
+export default transformer;
+```
+
+After every `npx orval` run, verify that `occurredAt` in generated models is `Date`, not `string`.
+If the pattern breaks, pin the orval minor version and open a task.
+
+### Frontend date display
+
+```typescript
+// shared/pipes/date-format.pipe.ts
+@Pipe({ name: 'dateFormat', standalone: true })
+export class DateFormatPipe implements PipeTransform {
+  transform(value: Date | string | null | undefined, format: 'short' | 'long' = 'short'): string {
+    if (!value) return '-';
+    const date = value instanceof Date ? value : new Date(value);
+    return date.toLocaleString('en-US', {
+      dateStyle: format === 'long' ? 'long' : 'medium',
+      timeStyle: 'short',
+      timeZone: 'UTC',
+    });
+  }
+}
+```
+
+Rules:
+- NEVER `new Date()` on a raw API string outside of DateFormatPipe or a facade
+- NEVER assume local timezone — always pass `timeZone: 'UTC'`
+
+---
+
+## DTO vs. Domain Model (STRICT)
+
+| Type | Location | Exposed via API? |
+|---|---|---|
+| Domain model (Transaction) | Domain | NEVER |
+| DTO (TransactionDto) | Application | YES |
+| EF Configuration | Infrastructure | NEVER |
+
+- Domain model -> DTO: in the Handler via an explicit mapper class
+- DTO/command -> domain model: via domain factory methods (Transaction.Create(...))
+- DO NOT use AutoMapper — explicit typed mapper methods only
+
+---
+
+## Coding Conventions (STRICT)
+
+- NO `var` when the type is not obvious from the right-hand side
+- NO `dynamic`
+- NO static classes (use DI)
+- NO service locator pattern
+- Strong typing everywhere; all code in English
+- Functions <= 40 lines, single responsibility
+- Files <= 300 lines — split by command/query slice when nearing the limit
+- Explicit naming (no `data`, `info`, `helper`)
+
+### Layer Responsibilities
+
+- Controller -> dispatch MediatR + return HTTP response
+- Handler -> business logic + ownership checks + SaveChanges
+- Repository -> data access only, never calls SaveChanges
+- Domain model -> invariants + behavior
+
+### Naming — C#
+
+- Classes, Methods, Properties, Interfaces, Enums, Constants -> PascalCase
+- Interfaces -> I prefix
+- Local variables, parameters -> camelCase
+- Private fields -> _camelCase
+
+### Naming — TypeScript
+
+- Variables, Functions -> camelCase
+- Classes, Interfaces -> PascalCase
+- Constants -> UPPER_SNAKE_CASE
+- Files -> kebab-case
+- NEVER `any` — use explicit types or `unknown` with type guards
+
+---
+
+## CancellationToken Forwarding (STRICT)
+
+Every public async method from Controller through Repository must accept and forward
+CancellationToken. No exceptions — including SaveChangesAsync.
+
+```
+Controller action (bound by Kestrel)
+  -> mediator.Send(request, cancellationToken)
+    -> Handler.Handle(request, cancellationToken)
+      -> Repository method (cancellationToken)
+        -> EF Core call (.FirstOrDefaultAsync(ct), .SaveChangesAsync(ct))
+```
+
+Repository interface (canonical):
+```csharp
+public interface ITransactionRepository
+{
+    Task<Transaction?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<IReadOnlyList<Transaction>> GetByUserIdAsync(Guid userId, int page, int pageSize,
+                                                      CancellationToken cancellationToken);
+    Task AddAsync(Transaction transaction, CancellationToken cancellationToken);
+    Task UpdateAsync(Transaction transaction, CancellationToken cancellationToken);
+}
+```
+
+Anti-patterns (STRICTLY FORBIDDEN):
+- Any async method without CancellationToken
+- CancellationToken.None passed explicitly in application code
+- SaveChangesAsync() without a token
+
+---
+
+## Validation (STRICT)
+
+| Layer | Tool | Result |
+|---|---|---|
+| Domain factory / value objects | Guard clauses | DomainException -> 400 |
+| Application commands | FluentValidation | ValidationException -> 422 |
+| Business rules in handlers | Result.Failure(Error.X(...)) | mapped by ToProblemResult() |
+
+Controllers do NOT validate.
+
+```csharp
+public sealed class CreateTransactionCommandValidator
+    : AbstractValidator<CreateTransactionCommand>
+{
+    public CreateTransactionCommandValidator()
+    {
+        RuleFor(x => x.UserId).NotEmpty();
+        RuleFor(x => x.Amount.Value).GreaterThan(0);
+        RuleFor(x => x.Amount.Currency).NotEmpty().Length(3);
+        RuleFor(x => x.Type).IsInEnum();
+        RuleFor(x => x.OccurredAt).NotEqual(default(DateTimeOffset));
+    }
+}
+```
+
+```csharp
+// Program.cs
+builder.Services.AddValidatorsFromAssembly(typeof(CreateTransactionCommand).Assembly);
+builder.Services.AddFluentValidationAutoValidation();
+```
+
+### HTTP Status Semantics
+
+| Situation | Status |
+|---|---|
+| FluentValidation failure | 422 Unprocessable Entity |
+| Domain invariant violation | 400 Bad Request |
+| Error.NotFound | 404 Not Found |
+| Error.Forbidden | 403 Forbidden |
+| Invalid/missing JWT claim | 401 Unauthorized |
+
+All errors use RFC 7807 Problem Details.
+
+---
+
+## Authorization (STRICT)
+
+- Global AuthorizeFilter on all controllers
+- Ownership check in the Handler — never in Controller or Repository
+- Every handler that touches a user-owned resource receives CallerId in the request object
+
+```csharp
+// Api/Shared/ApiControllerBase.cs
+protected Guid GetCurrentUserId()
+{
+    string? sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (sub is null || !Guid.TryParse(sub, out Guid userId))
+        throw new InvalidClaimException();
+    return userId;
+}
+```
+
+Verify JwtBearerOptions.MapInboundClaims = false in Program.cs and confirm the IdP
+populates `sub` as a GUID string before wiring real auth.
+
+---
+
+## Exception Model (STRICT)
+
+DomainException -> domain invariant violations (-> 400).
+AppException subtypes -> infrastructure/auth failures only.
+Business errors -> Result<T>, not exceptions.
+
+```csharp
+public sealed class DomainException : Exception
+{
+    public DomainException(string message) : base(message) { }
+}
+
+public abstract class AppException : Exception
+{
+    public int StatusCode { get; }
+    public string ErrorType { get; }
+    protected AppException(int statusCode, string errorType, string message)
+        : base(message) { StatusCode = statusCode; ErrorType = errorType; }
+}
+
+public sealed class InvalidClaimException : AppException
+{
+    public InvalidClaimException()
+        : base(401, "https://financecore.dev/errors/invalid-claim",
+               "The JWT subject claim is missing or malformed.") { }
+}
+```
+
+UnauthorizedAccessException (BCL) is NEVER thrown. Use InvalidClaimException.
+
+### ExceptionHandlingMiddleware
+
+```csharp
+public sealed class ExceptionHandlingMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+
+    public ExceptionHandlingMiddleware(RequestDelegate next,
+                                       ILogger<ExceptionHandlingMiddleware> logger)
+    { _next = next; _logger = logger; }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        try { await _next(context); }
+        catch (Exception ex) { await HandleAsync(context, ex); }
+    }
+
+    private async Task HandleAsync(HttpContext context, Exception exception)
+    {
+        (int status, string type, string title, string? detail) = exception switch
+        {
+            ValidationException ve => (422,
+                "https://financecore.dev/errors/validation-failed", "Validation failed",
+                string.Join("; ", ve.Errors.Select(e => e.ErrorMessage))),
+            DomainException de => (400,
+                "https://financecore.dev/errors/domain-rule-violation", "Domain rule violation",
+                de.Message),
+            AppException ae => (ae.StatusCode, ae.ErrorType, ResolveTitle(ae.StatusCode), ae.Message),
+            _ => (500, "https://financecore.dev/errors/internal", "Internal server error", null)
+        };
+
+        if (status == 500)
+            _logger.LogError(exception, "Unhandled exception on {Path}", context.Request.Path);
+
+        ProblemDetails problem = new()
+        {
+            Status = status, Type = type, Title = title, Detail = detail,
+            Instance = context.Request.Path,
+        };
+        problem.Extensions["traceId"] = Activity.Current?.Id ?? context.TraceIdentifier;
+
+        context.Response.StatusCode  = status;
+        context.Response.ContentType = "application/problem+json";
+        await context.Response.WriteAsJsonAsync(problem);
+    }
+
+    private static string ResolveTitle(int status) => status switch
+    {
+        401 => "Unauthorized", 403 => "Forbidden", 404 => "Not found", _ => "Application error",
+    };
+}
+```
+
+Register in Program.cs BEFORE routing:
+```csharp
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+```
+
+---
+
+## Data Access Strategy (STRICT)
+
+- DbContext exists ONLY in Infrastructure
+- Handlers depend on IXxxRepository and IUnitOfWork — never on DbContext
+- Repositories return domain models, NOT IQueryable
+- Default to AsNoTracking() for reads; tracking only on write paths
+- DO NOT implement generic repositories
+- SaveChangesAsync is called ONLY in the Handler
+
+### IDbTransaction for multi-repository operations
+
+```csharp
+// Application/Shared/IDbTransaction.cs
+public interface IDbTransaction : IAsyncDisposable
+{
+    Task CommitAsync(CancellationToken cancellationToken = default);
+    Task RollbackAsync(CancellationToken cancellationToken = default);
+}
+
+// Application/Shared/IUnitOfWork.cs
+public interface IUnitOfWork
+{
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task<IDbTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+}
+```
+
+Handler multi-repository pattern:
+```csharp
+await using IDbTransaction tx = await _unitOfWork.BeginTransactionAsync(cancellationToken);
+try
+{
+    await _transactionRepository.AddAsync(transaction, cancellationToken);
+    await _classificationRepository.AddAsync(classification, cancellationToken);
+    await _unitOfWork.SaveChangesAsync(cancellationToken);
+    await tx.CommitAsync(cancellationToken);
+    return Result.Success(TransactionMapper.ToDto(transaction));
+}
+catch
+{
+    await tx.RollbackAsync(cancellationToken);
+    throw;
+}
+```
+
+### Migrations
+
+```bash
+# run from /backend
+dotnet ef migrations add <Name> \
+  --project src/FinanceCore.Infrastructure \
+  --startup-project src/FinanceCore.Api
+
+dotnet ef database update \
+  --project src/FinanceCore.Infrastructure \
+  --startup-project src/FinanceCore.Api
+```
+
+### Query Rules
+
+- Avoid N+1 (use Include when needed)
+- Always paginate (default pageSize = 20, max pageSize = 100; return 400 if exceeded)
+
+---
+
+## API Contract and Frontend Integration (STRICT)
+
+### orval Configuration
+
+```typescript
+// frontend/orval.config.ts
+import { defineConfig } from 'orval';
+
+export default defineConfig({
+  financeCore: {
+    input: {
+      target: process.env['SWAGGER_URL'] ?? 'http://localhost:5000/swagger/v1/swagger.json',
+    },
+    output: {
+      target:  'src/app/api-client/finance-core.service.ts',
+      schemas: 'src/app/api-client/models',
+      client:  'angular',
+      baseUrl: '',
+      override: {
+        mutator: { path: 'src/app/core/http-client.mutator.ts', name: 'customHttpClient' },
+        transformer: 'src/app/core/orval-date.transformer.ts',
+      },
+    },
+  },
+});
+```
+
+```typescript
+// frontend/src/app/core/http-client.mutator.ts
+import { HttpClient } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
+
+export const customHttpClient = <T>(config: Parameters<HttpClient['request']>[0]) => {
+  const http = inject(HttpClient);
+  return http.request<T>({ ...config, url: `${environment.apiBaseUrl}${config.url}` });
+};
+```
+
+Backend runs on http://localhost:5000 for local dev.
+If switching to HTTPS (5001), update environment.ts and the orval fallback in the same commit.
+
+### API Versioning
+
+```
+/api/v1/transactions
+/api/v1/categories
+/api/v1/merchants
+```
+
+Breaking changes -> new version. Never break existing contracts silently.
+
+### Money DTO (CRITICAL)
+
+```csharp
+// Application/Shared/Dtos/MoneyDto.cs
+public sealed record MoneyDto
+{
+    public long Value { get; init; }           // AmountCents on the wire
+    public long NormalizedValue { get; init; } // NormalizedAmountCents in USD
+    public string Currency { get; init; } = string.Empty;
+}
+```
+
+Wire JSON:
+```json
+{ "amount": { "value": 5000, "normalizedValue": 5000, "currency": "USD" } }
+```
+
+```csharp
+public static class MoneyMapper
+{
+    public static MoneyDto ToDto(Money money) => new()
+    {
+        Value = money.AmountCents,
+        NormalizedValue = money.NormalizedAmountCents,
+        Currency = money.Currency,
+    };
+
+    public static Money ToDomain(MoneyDto dto) =>
+        new(dto.Value, dto.Currency, dto.NormalizedValue);
+}
+```
+
+Frontend pipe:
+```typescript
+@Pipe({ name: 'moneyFormat', standalone: true })
+export class MoneyFormatPipe implements PipeTransform {
+  transform(amount: MoneyDto): string {
+    return (amount.value / 100).toLocaleString('en-US', {
+      style: 'currency',
+      currency: amount.currency,
+    });
+  }
+}
+```
+
+Rules:
+- amount.value is cents — / 100 happens ONLY inside MoneyFormatPipe
+- value is always long (TypeScript number) — never decimal or float
+
+### Pagination Contract
+
+```
+GET /api/v1/transactions?page=1&pageSize=20
+```
+
+```json
+{ "data": [...], "meta": { "page": 1, "pageSize": 20, "totalItems": 100, "totalPages": 5 } }
+```
+
+Default pageSize: 20 — Max: 100 — return 400 if exceeded.
+
+---
+
+## Angular Frontend Architecture (STRICT)
+
+### Bootstrap Strategy
+
+Standalone components + bootstrapApplication. NgModules are FORBIDDEN.
+
+```typescript
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+  ],
+};
+```
+
+### inject() Function (REQUIRED — not constructor injection)
+
+```typescript
+// CORRECT
+@Injectable({ providedIn: 'root' })
+export class TransactionFacadeService {
+  private readonly api = inject(FinanceCoreService);
+  private readonly router = inject(Router);
+}
+
+// FORBIDDEN
+@Injectable({ providedIn: 'root' })
+export class TransactionFacadeService {
+  constructor(private readonly api: FinanceCoreService) {}
+}
+```
+
+### Functional Interceptors (REQUIRED)
+
+```typescript
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = localStorage.getItem('token');
+  const authReq = token
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    : req;
+  return next(authReq);
+};
+```
+
+localStorage for the token is the accepted tradeoff. Do not change without an explicit decision.
+
+### Lazy Routes
+
+```typescript
+{
+  path: 'transactions',
+  loadComponent: () =>
+    import('./features/transactions/pages/transaction-list.page')
+      .then(m => m.TransactionListPage),
+}
+```
+
+### Folder Structure
+
+```
+/src/app
+  /core
+    /interceptors
+      auth.interceptor.ts
+      error.interceptor.ts
+    /guards
+      auth.guard.ts
+  /shared
+    /components
+    /pipes
+      money-format.pipe.ts
+      date-format.pipe.ts
+    /models
+      problem-details.model.ts
+  /features
+    /transactions
+      /components
+      /pages
+        transaction-list.page.ts
+        transaction-detail.page.ts
+      transaction.routes.ts
+      transaction-facade.service.ts
+    /categories
+      category-facade.service.ts
+      category.routes.ts
+    /merchants
+      merchant-facade.service.ts
+      merchant.routes.ts
+    /classifications
+      classification-facade.service.ts
+    /users
+      user-facade.service.ts
+      user.routes.ts
+  /api-client                       <- orval output — DO NOT EDIT MANUALLY
+    finance-core.service.ts
+    /models
+  app.routes.ts
+  app.component.ts
+  app.config.ts
+```
+
+### State Management
+
+- Angular Signals for local and feature-level state (default)
+- RxJS for async streams — convert to signals at boundaries
+- No NgRx unless cross-feature state complexity justifies it
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class TransactionFacadeService {
+  private readonly api = inject(FinanceCoreService);
+  private readonly _transactions = signal<TransactionDto[]>([]);
+  readonly transactions = this._transactions.asReadonly();
+
+  loadTransactions(destroyRef: DestroyRef): void {
+    this.api.getTransactions()
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(result => this._transactions.set(result.data));
+  }
+}
+```
+
+Always pass DestroyRef to any method that subscribes. Never leave subscriptions without teardown.
+
+### Styles
+
+- SCSS for all component styles
+- Theme values go in CSS custom properties — no hardcoded colors or sizes in component files
+- Global custom properties defined in src/styles.scss
+
+### Error Handling (Frontend)
+
+- error.interceptor.ts catches all API errors
+- Parse RFC 7807 ProblemDetails — map status + type to user-friendly messages
+- Never display raw detail strings from the API to users
+
+### Anti-Patterns (STRICTLY FORBIDDEN)
+
+- Editing generated API client files manually
+- Hardcoded endpoint strings in frontend services
+- Duplicated DTO types between frontend and backend
+- any in TypeScript
+- NgModules (@NgModule)
+- Class-based interceptors
+- loadChildren with a module — use loadComponent
+- Hardcoding apiBaseUrl outside environment.ts
+- amount.value / 100 anywhere except MoneyFormatPipe
+- Subscriptions without takeUntilDestroyed or equivalent teardown
+- Attaching Authorization header in the mutator
+- Constructor injection in Angular — use inject()
+
+---
+
+## AI / Classification Layer (INITIAL RULES)
+
+- LLM calls abstracted behind IClassificationProvider in Application/Shared
+- Concrete implementations live in Infrastructure
+- PII must NOT be sent to external LLM APIs without an explicit data handling decision
+- All LLM calls must respect CancellationToken
+- Set an explicit HttpClient timeout for LLM calls (recommended: 30s)
+- LLM API keys in environment variables only — never hardcoded
+
+---
+
+## Logging
+
+- No Console.Write*
+- Use ILogger<T> with structured logging
+- Always include context: resource IDs, operation names, caller IDs
+- 500 errors: log full exception with LogError
+- 4xx errors: do NOT log
+
+---
+
+## Environment Variables
+
+| Variable | Used by |
+|---|---|
+| DATABASE_URL | Infrastructure (connection string) |
+| JWT_SECRET | Api (JWT signing) |
+| SWAGGER_URL | Frontend CI (orval input) |
+| OPENAI_API_KEY (or equivalent) | Infrastructure (LLM provider) |
+
+---
+
+## Testing Conventions
+
+### Backend — xUnit + Moq + FluentAssertions
+
+Test name pattern: should_[action]_[condition]
+
+```csharp
+public class GetTransactionByIdQueryHandlerTests
+{
+    [Fact]
+    public async Task should_return_transaction_when_caller_owns_it()
+    {
+        Mock<ITransactionRepository> repo = new();
+        // ...
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Id.Should().Be(transactionId);
+    }
+
+    [Fact]
+    public async Task should_return_forbidden_when_caller_does_not_own_transaction()
+    { ... }
+}
+```
+
+Coverage targets (v1):
+- Unit tests: handlers and domain models
+- Integration tests: controller endpoints (WebApplicationFactory)
+- No e2e in v1
+
+### Frontend — Jest + Angular Testing Library
+
+```typescript
+describe('TransactionFacadeService', () => {
+  it('should load transactions into signal on success', async () => { ... });
+});
+```
+
+---
+
+## Git and Branching
+
+- main -> production only (protected, no direct commits)
+- dev -> active development
+- feature/* or HU-XXX -> feature branches
+
+Conventional Commits:
+```
+feat: add create-transaction command handler
+fix: correct money normalization in Money value object
+refactor: extract GetTransactionsByUser into dedicated query
+```
+
+---
+
+## What NOT to Generate
+
+- No Node.js or Express code
+- No dynamic, implicit types, or any
+- No static classes or service locator pattern
+- No business logic in Controllers — use MediatR handlers
+- No hardcoded secrets or connection strings
+- No synchronous/blocking operations where avoidable
+- No EF data annotations on domain models
+- No decimal, double, float, or int for monetary amounts
+- No SaveChanges inside a Repository
+- No direct DbContext injection outside Infrastructure
+- No generic repository pattern
+- No NgModules
+- No class-based Angular interceptors
+- No constructor injection in Angular — use inject()
+- No loadChildren with a module — use loadComponent
+- No amount.value / 100 outside MoneyFormatPipe
+- No subscriptions without takeUntilDestroyed or equivalent teardown
+- No exceptions thrown for business errors — use Result.Failure(Error.X(...))
+- No AutoMapper
