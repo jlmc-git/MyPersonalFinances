@@ -1,3 +1,4 @@
+using FinanceCore.Domain.Merchants;
 using FinanceCore.Domain.Shared;
 using FinanceCore.Domain.Shared.ValueObjects;
 
@@ -10,6 +11,8 @@ public sealed class Transaction
     public DateTimeOffset OccurredAt { get; private set; }
     public string? Description { get; private set; }
     public Guid? MerchantId { get; private set; }
+    public Merchant? Merchant { get; private set; }
+    public TransactionSource Source { get; private set; }
     public ClassificationStatus ClassificationStatus { get; private set; }
 
     private Transaction()
@@ -18,13 +21,20 @@ public sealed class Transaction
         ClassificationStatus = null!;
     }
 
-    private Transaction(Money amount, DateTimeOffset occurredAt, string? description, Guid? merchantId)
+    private Transaction(
+        Money amount,
+        DateTimeOffset occurredAt,
+        string? description,
+        Merchant? merchant,
+        TransactionSource source)
     {
         Id = Guid.NewGuid();
         Amount = amount;
         OccurredAt = occurredAt;
         Description = NormalizeOptionalText(description);
-        MerchantId = merchantId;
+        Merchant = merchant;
+        MerchantId = merchant?.Id;
+        Source = source;
         ClassificationStatus = ClassificationStatus.CreatePending();
     }
 
@@ -32,7 +42,8 @@ public sealed class Transaction
         Money amount,
         DateTimeOffset occurredAt,
         string? description = null,
-        Guid? merchantId = null)
+        Merchant? merchant = null,
+        TransactionSource source = TransactionSource.Manual)
     {
         if (amount is null)
         {
@@ -44,22 +55,28 @@ public sealed class Transaction
             throw new DomainException("Transaction occurrence time must be UTC.");
         }
 
-        if (merchantId == Guid.Empty)
+        if (!Enum.IsDefined(source))
         {
-            throw new DomainException("Merchant id cannot be empty.");
+            throw new DomainException("Transaction source is not supported.");
         }
 
-        return new Transaction(amount, occurredAt, description, merchantId);
+        return new Transaction(amount, occurredAt, description, merchant, source);
     }
 
-    public void ChangeMerchant(Guid? merchantId)
+    public void ChangeMerchant(Merchant? merchant)
     {
-        if (merchantId == Guid.Empty)
+        Merchant = merchant;
+        MerchantId = merchant?.Id;
+    }
+
+    public void ChangeSource(TransactionSource source)
+    {
+        if (!Enum.IsDefined(source))
         {
-            throw new DomainException("Merchant id cannot be empty.");
+            throw new DomainException("Transaction source is not supported.");
         }
 
-        MerchantId = merchantId;
+        Source = source;
     }
 
     public void UpdateDescription(string? description)
@@ -87,4 +104,14 @@ public sealed class Transaction
         string? trimmed = value?.Trim();
         return string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
     }
+}
+
+public enum TransactionSource
+{
+    Manual = 1,
+    BankStatementImport = 2,
+    BankApi = 3,
+    CreditCardStatementImport = 4,
+    DigitalWallet = 5,
+    Cash = 6,
 }
