@@ -1,0 +1,16 @@
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\bin\Debug\net9.0\FinanceCore.Application.deps.json
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\bin\Debug\net9.0\FinanceCore.Application.dll
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\bin\Debug\net9.0\FinanceCore.Application.pdb
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\bin\Debug\net9.0\FinanceCore.Domain.dll
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\bin\Debug\net9.0\FinanceCore.Domain.pdb
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\FinanceCore.Application.csproj.AssemblyReference.cache
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\FinanceCore.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\FinanceCore.Application.AssemblyInfoInputs.cache
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\FinanceCore.Application.AssemblyInfo.cs
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\FinanceCore.Application.csproj.CoreCompileInputs.cache
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\FinanceCore.Application.sourcelink.json
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\FinanceC.DCDAB3EF.Up2Date
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\FinanceCore.Application.dll
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\refint\FinanceCore.Application.dll
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\FinanceCore.Application.pdb
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Application\obj\Debug\net9.0\ref\FinanceCore.Application.dll

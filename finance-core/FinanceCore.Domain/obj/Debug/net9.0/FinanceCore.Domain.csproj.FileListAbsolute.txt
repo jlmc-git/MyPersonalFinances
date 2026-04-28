@@ -1,0 +1,12 @@
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\bin\Debug\net9.0\FinanceCore.Domain.deps.json
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\bin\Debug\net9.0\FinanceCore.Domain.dll
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\bin\Debug\net9.0\FinanceCore.Domain.pdb
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\obj\Debug\net9.0\FinanceCore.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\obj\Debug\net9.0\FinanceCore.Domain.AssemblyInfoInputs.cache
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\obj\Debug\net9.0\FinanceCore.Domain.AssemblyInfo.cs
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\obj\Debug\net9.0\FinanceCore.Domain.csproj.CoreCompileInputs.cache
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\obj\Debug\net9.0\FinanceCore.Domain.sourcelink.json
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\obj\Debug\net9.0\FinanceCore.Domain.dll
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\obj\Debug\net9.0\refint\FinanceCore.Domain.dll
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\obj\Debug\net9.0\FinanceCore.Domain.pdb
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.Domain\obj\Debug\net9.0\ref\FinanceCore.Domain.dll
