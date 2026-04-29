@@ -203,6 +203,19 @@
         "runtime": {
           "bin/placeholder/FinanceCore.Domain.dll": {}
         }
+      },
+      "FinanceCore.Infrastructure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "FinanceCore.Application": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/FinanceCore.Infrastructure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/FinanceCore.Infrastructure.dll": {}
+        }
       }
     }
   },
@@ -512,11 +525,17 @@
       "type": "project",
       "path": "../FinanceCore.Domain/FinanceCore.Domain.csproj",
       "msbuildProject": "../FinanceCore.Domain/FinanceCore.Domain.csproj"
+    },
+    "FinanceCore.Infrastructure/1.0.0": {
+      "type": "project",
+      "path": "../FinanceCore.Infrastructure/FinanceCore.Infrastructure.csproj",
+      "msbuildProject": "../FinanceCore.Infrastructure/FinanceCore.Infrastructure.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net9.0": [
       "FinanceCore.Application >= 1.0.0",
+      "FinanceCore.Infrastructure >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 9.0.3"
     ]
   },
@@ -554,6 +573,9 @@
           "projectReferences": {
             "C:\\Users\\jlmor\\source\\repos\\MyPersonalFinances\\finance-core\\FinanceCore.Application\\FinanceCore.Application.csproj": {
               "projectPath": "C:\\Users\\jlmor\\source\\repos\\MyPersonalFinances\\finance-core\\FinanceCore.Application\\FinanceCore.Application.csproj"
+            },
+            "C:\\Users\\jlmor\\source\\repos\\MyPersonalFinances\\finance-core\\FinanceCore.Infrastructure\\FinanceCore.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\jlmor\\source\\repos\\MyPersonalFinances\\finance-core\\FinanceCore.Infrastructure\\FinanceCore.Infrastructure.csproj"
             }
           }
         }

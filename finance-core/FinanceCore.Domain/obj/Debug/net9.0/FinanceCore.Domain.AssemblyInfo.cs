@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FinanceCore.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+50b959db8eb77c42eb1c8da7f9dc647f73e7a150")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c31ad3c1ff3d245d7d594af81a78940e606e8d93")]
 [assembly: System.Reflection.AssemblyProductAttribute("FinanceCore.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FinanceCore.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

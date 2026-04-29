@@ -9,6 +9,7 @@
       "FinanceCore.API/1.0.0": {
         "dependencies": {
           "FinanceCore.Application": "1.0.0",
+          "FinanceCore.Infrastructure": "1.0.0",
           "Microsoft.AspNetCore.OpenApi": "9.0.3"
         },
         "runtime": {
@@ -145,6 +146,17 @@
             "fileVersion": "1.0.0.0"
           }
         }
+      },
+      "FinanceCore.Infrastructure/1.0.0": {
+        "dependencies": {
+          "FinanceCore.Application": "1.0.0"
+        },
+        "runtime": {
+          "FinanceCore.Infrastructure.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
       }
     }
   },
@@ -237,6 +249,11 @@
       "sha512": ""
     },
     "FinanceCore.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FinanceCore.Infrastructure/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

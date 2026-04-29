@@ -45,3 +45,5 @@ C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.API\obj\
 C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.API\obj\Debug\net9.0\FinanceCore.API.pdb
 C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.API\obj\Debug\net9.0\FinanceCore.API.genruntimeconfig.cache
 C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.API\obj\Debug\net9.0\ref\FinanceCore.API.dll
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.API\bin\Debug\net9.0\FinanceCore.Infrastructure.dll
+C:\Users\jlmor\source\repos\MyPersonalFinances\finance-core\FinanceCore.API\bin\Debug\net9.0\FinanceCore.Infrastructure.pdb
