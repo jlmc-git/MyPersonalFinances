@@ -1,0 +1,352 @@
+[
+  {
+    "amountInMinorUnits": 4529900,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-02T18:34:00Z",
+    "description": "Éxito Chapinero — groceries & household",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 389500,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-03T13:12:00Z",
+    "description": "SORIANA HIPER — supermarket Ciudad de México",
+    "source": "BankApi"
+  },
+  {
+    "amountInMinorUnits": 124590,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-03T19:45:00Z",
+    "description": "IFOOD *RESTAURANTE — Padaria Real SP",
+    "source": "DigitalWallet"
+  },
+  {
+    "amountInMinorUnits": 1850000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-04T07:22:00Z",
+    "description": "Uber Trip — Bogotá zona norte",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 8650,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-04T08:05:00Z",
+    "description": "METRO CDMX — rechargeable card top-up Linea B",
+    "source": "BankStatementImport"
+  },
+  {
+    "amountInMinorUnits": 8990,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-05T12:30:00Z",
+    "description": "SPOTIFY BR — Premium Individual monthly",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 2799000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-05T20:15:00Z",
+    "description": "CARMEN RESTAURANTE — dinner Chapinero",
+    "source": "BankApi"
+  },
+  {
+    "amountInMinorUnits": 459900,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-06T21:40:00Z",
+    "description": "NETFLIX.COM — streaming subscription",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 45990,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-07T09:18:00Z",
+    "description": "DROGASIL — pharmacy São Paulo Av Paulista",
+    "source": "Manual"
+  },
+  {
+    "amountInMinorUnits": 50000000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-07T14:02:00Z",
+    "description": "BBVA ATM RETIRO — Bogotá Cra 7",
+    "source": "BankApi"
+  },
+  {
+    "amountInMinorUnits": 132750,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-08T13:55:00Z",
+    "description": "REST EL CARDENAL — comida mexicana centro histórico",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 287900,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-08T18:10:00Z",
+    "description": "CARREFOUR BR — supermarket Rio shopping",
+    "source": "BankStatementImport"
+  },
+  {
+    "amountInMinorUnits": 980000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-09T06:50:00Z",
+    "description": "TransMilenio Recarga — Bogotá portal norte",
+    "source": "DigitalWallet"
+  },
+  {
+    "amountInMinorUnits": 21950,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-09T11:20:00Z",
+    "description": "Farmacias del Ahorro — vitamins & sunscreen",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 32900,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-10T08:40:00Z",
+    "description": "UBER * TRIP — Rio de Janeiro Botafogo",
+    "source": "DigitalWallet"
+  },
+  {
+    "amountInMinorUnits": 620500,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-10T17:30:00Z",
+    "description": "CFE SERVICIOS — electric bill residential",
+    "source": "BankApi"
+  },
+  {
+    "amountInMinorUnits": 1599900,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-11T15:22:00Z",
+    "description": "Droguería Colsubsidio — pharmacy Medellín",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 89900,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-11T19:05:00Z",
+    "description": "IPLAN — fiber internet monthly São Paulo",
+    "source": "BankStatementImport"
+  },
+  {
+    "amountInMinorUnits": 4550000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-12T14:08:00Z",
+    "description": "Tienda D1 — discount groceries Cali",
+    "source": "BankApi"
+  },
+  {
+    "amountInMinorUnits": 98550,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-12T22:15:00Z",
+    "description": "Seven Eleven MX — snacks late night Polanco",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 169890,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-13T12:45:00Z",
+    "description": "Outback BR — lunch shopping Iguatemi",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 7500000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-13T16:33:00Z",
+    "description": "CAJERO BANCOLOMBIA RETIRO — Medellín El Poblado",
+    "source": "BankApi"
+  },
+  {
+    "amountInMinorUnits": 425000,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-14T09:10:00Z",
+    "description": "Uber ride — airport MEX to Roma Norte",
+    "source": "DigitalWallet"
+  },
+  {
+    "amountInMinorUnits": 55990,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-14T18:50:00Z",
+    "description": "RAIA DROGASIL — prescription pickup Brasília",
+    "source": "Manual"
+  },
+  {
+    "amountInMinorUnits": 1899000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-15T13:25:00Z",
+    "description": "La Puerta Falsa — traditional Colombian lunch BOG",
+    "source": "Cash"
+  },
+  {
+    "amountInMinorUnits": 278900,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-15T20:00:00Z",
+    "description": "Walmart Supercenter — groceries guadalajara",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 214900,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-16T07:55:00Z",
+    "description": "COMGÁS — residential gas bill SP",
+    "source": "BankApi"
+  },
+  {
+    "amountInMinorUnits": 990000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-16T19:40:00Z",
+    "description": "Amazon Prime Video CO — subscription renewal",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 165000,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-17T08:30:00Z",
+    "description": "Coffee Bean & Tea Leaf MX — breakfast reforma",
+    "source": "BankStatementImport"
+  },
+  {
+    "amountInMinorUnits": 76900,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-17T11:15:00Z",
+    "description": "METRÔ SP — Bilhete único recharge",
+    "source": "DigitalWallet"
+  },
+  {
+    "amountInMinorUnits": 3345000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-18T16:02:00Z",
+    "description": "Carulla — organic produce & deli Bogotá",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 89550,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-18T21:30:00Z",
+    "description": "Taquería El Califa — tacos CDMX condesa",
+    "source": "Cash"
+  },
+  {
+    "amountInMinorUnits": 132990,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-19T14:18:00Z",
+    "description": "PIZZA HUT BR — delivery Belo Horizonte",
+    "source": "DigitalWallet"
+  },
+  {
+    "amountInMinorUnits": 11250000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-19T10:05:00Z",
+    "description": "ATM BANCO DE BOGOTÁ — withdrawal zona rosa",
+    "source": "BankApi"
+  },
+  {
+    "amountInMinorUnits": 312450,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-20T12:00:00Z",
+    "description": "Telmex — landline & internet bundle",
+    "source": "BankStatementImport"
+  },
+  {
+    "amountInMinorUnits": 54900,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-20T17:45:00Z",
+    "description": "Spotify BR — Duo plan monthly",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 568000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-21T09:22:00Z",
+    "description": "Librería Nacional — books & stationery",
+    "source": "Manual"
+  },
+  {
+    "amountInMinorUnits": 198750,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-21T19:55:00Z",
+    "description": "Starbucks Reserve MX — specialty coffee Polanco",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 899900,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-22T08:12:00Z",
+    "description": "Extra Hiper — weekly groceries Curitiba",
+    "source": "BankApi"
+  },
+  {
+    "amountInMinorUnits": 725000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-22T22:40:00Z",
+    "description": "Rappi Prime CO — delivery subscription",
+    "source": "DigitalWallet"
+  },
+  {
+    "amountInMinorUnits": 239000,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-23T07:48:00Z",
+    "description": "Metrobús CDMX — integrated fare recharge",
+    "source": "BankStatementImport"
+  },
+  {
+    "amountInMinorUnits": 4150000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-23T13:30:00Z",
+    "description": "CAFÉ Y TIENDA LA ESQUINA — café + packaged snacks & milk (ambiguous grocery/café)",
+    "source": "Cash"
+  },
+  {
+    "amountInMinorUnits": 67890,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-24T11:05:00Z",
+    "description": "PANVEL — pharmacy skincare Porto Alegre",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 154990,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-24T18:20:00Z",
+    "description": "Fresh Brew Market — espresso bar + packaged pantry items (ambiguous)",
+    "source": "BankStatementImport"
+  },
+  {
+    "amountInMinorUnits": 955000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-25T06:30:00Z",
+    "description": "Uber CO — early airport run Medellín",
+    "source": "DigitalWallet"
+  },
+  {
+    "amountInMinorUnits": 112990,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-25T12:55:00Z",
+    "description": "MINI MERCADO DO ZÉ — corner store drinks & sandwiches",
+    "source": "Cash"
+  },
+  {
+    "amountInMinorUnits": 428750,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-26T15:10:00Z",
+    "description": "Cinemex — movie tickets + combo concessions",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 267800,
+    "currencyCode": "BRL",
+    "occurredAt": "2026-04-26T19:35:00Z",
+    "description": "Light Serviços Elétricos — electricity Rio bill",
+    "source": "BankApi"
+  },
+  {
+    "amountInMinorUnits": 1980000,
+    "currencyCode": "COP",
+    "occurredAt": "2026-04-27T10:44:00Z",
+    "description": "Olimpica Supermarket — cleaning supplies Cartagena",
+    "source": "CreditCardStatementImport"
+  },
+  {
+    "amountInMinorUnits": 87550,
+    "currencyCode": "MXN",
+    "occurredAt": "2026-04-27T22:08:00Z",
+    "description": "McDonald's MX — late snack insurgentes",
+    "source": "DigitalWallet"
+  }
+]

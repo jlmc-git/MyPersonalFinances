@@ -1,4 +1,3 @@
-using FinanceCore.Application.Transactions;
 using FinanceCore.Application.Transactions.Dtos;
 using FinanceCore.Domain.Merchants;
 using FinanceCore.Domain.Shared.ValueObjects;
@@ -9,11 +8,11 @@ namespace FinanceCore.Application.Transactions.Commands.CreateTransaction;
 
 public sealed record CreateTransactionCommand(
     long AmountInMinorUnits,
-    CurrencyCode CurrencyCode,
+    string CurrencyCode,
     DateTimeOffset OccurredAt,
     string? Description,
-    Merchant? Merchant,
-    TransactionSource Source) : IRequest<TransactionDto>;
+    Guid? MerchantId,
+    string Source) : IRequest<TransactionDto>;
 
 public sealed class CreateTransactionCommandHandler(
     ITransactionRepository transactionRepository)
@@ -23,14 +22,20 @@ public sealed class CreateTransactionCommandHandler(
         CreateTransactionCommand request,
         CancellationToken cancellationToken)
     {
-        Money amount = Money.Create(request.AmountInMinorUnits, request.CurrencyCode);
+        if (!Enum.TryParse<CurrencyCode>(request.CurrencyCode, true, out var currencyCode))
+            throw new ArgumentException($"Invalid currency code: '{request.CurrencyCode}'.");
+
+        if (!Enum.TryParse<TransactionSource>(request.Source, true, out var source))
+            throw new ArgumentException($"Invalid transaction source: '{request.Source}'.");
+
+        Money amount = Money.Create(request.AmountInMinorUnits, currencyCode);
 
         Transaction transaction = Transaction.Create(
             amount,
             request.OccurredAt,
             request.Description,
-            request.Merchant,
-            request.Source);
+            null,
+            source);
 
         await transactionRepository.AddAsync(transaction, cancellationToken);
 
@@ -45,13 +50,13 @@ public sealed class CreateTransactionCommandHandler(
             transaction.Description,
             transaction.MerchantId,
             ToDto(transaction.Merchant),
-            transaction.Source,
+            transaction.Source.ToString(),
             ToDto(transaction.ClassificationStatus));
 
     private static MoneyDto ToDto(Money money) =>
         new(
             money.AmountInMinorUnits,
-            money.CurrencyCode,
+            money.CurrencyCode.ToString(),
             money.DecimalPlaces,
             money.Amount);
 
@@ -61,14 +66,18 @@ public sealed class CreateTransactionCommandHandler(
     private static ClassificationStatusDto ToDto(ClassificationStatus status) =>
         status switch
         {
-            ClassificationStatus.Pending _ => new ClassificationStatusDto("Pending"),
+            ClassificationStatus.Pending _ => new ClassificationStatusDto(
+                "Pending",
+                ReasonCode: "ClassificationPending"),
             ClassificationStatus.Classified classified => new ClassificationStatusDto(
                 "Classified",
                 classified.CategoryId,
-                classified.Confidence),
+                classified.Confidence,
+                ReasonCode: "DomainClassificationApplied"),
             ClassificationStatus.Rejected rejected => new ClassificationStatusDto(
                 "Rejected",
-                Reason: rejected.Reason),
+                Reason: rejected.Reason,
+                ReasonCode: "DomainClassificationRejected"),
             _ => throw new InvalidOperationException("Unsupported classification status.")
         };
 }

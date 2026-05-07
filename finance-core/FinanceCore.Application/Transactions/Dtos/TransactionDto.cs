@@ -1,5 +1,3 @@
-using FinanceCore.Domain.Transactions;
-
 namespace FinanceCore.Application.Transactions.Dtos;
 
 public sealed record TransactionDto(
@@ -9,5 +7,5 @@ public sealed record TransactionDto(
     string? Description,
     Guid? MerchantId,
     MerchantDto? Merchant,
-    TransactionSource Source,
+    string Source,
     ClassificationStatusDto ClassificationStatus);

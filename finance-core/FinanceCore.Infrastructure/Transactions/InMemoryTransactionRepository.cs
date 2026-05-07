@@ -8,6 +8,12 @@ public sealed class InMemoryTransactionRepository : ITransactionRepository
 {
     private readonly ConcurrentDictionary<Guid, Transaction> _transactions = new();
 
+    public Task<Transaction?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        _transactions.TryGetValue(id, out Transaction? transaction);
+        return Task.FromResult(transaction);
+    }
+
     public Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default)
     {
         _transactions.TryAdd(transaction.Id, transaction);
